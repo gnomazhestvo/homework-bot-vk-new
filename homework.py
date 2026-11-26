@@ -108,13 +108,14 @@ def check_response(response):
     """Проверяет ответ API на соответствие документации.
 
     - ответ должен быть словарем;
-    - в словаре должен быть ключ 'homeworks';
+    - в словаре должны быть ключи 'homeworks' и 'current_date';
     - значением homeworks является список домашек.
     """
     if not isinstance(response, dict):
         raise TypeError(f'Сервер вернул {type(response)} вместо dict.')
-    if 'homeworks' not in response:
-        raise KeyError('Отсутствуют данные о Домашках в ответе сервера.')
+    for key in ('homeworks', 'current_date'):
+        if key not in response:
+            raise KeyError(f'В ответе API нет ключа {key}.')
     homeworks = response['homeworks']
     if not isinstance(homeworks, list):
         raise TypeError(
@@ -163,7 +164,7 @@ def main():
         try:
             response = get_api_answer(timestamp)
             homeworks = check_response(response)
-            new_timestamp = response.get('current_date', timestamp)
+            new_timestamp = response['current_date']
             if homeworks:
                 message = parse_status(homeworks[0])
             else:
